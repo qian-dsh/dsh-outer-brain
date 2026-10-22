@@ -1,0 +1,23 @@
+# dsh-outer-brain · bundle 挂载声明
+# name 必须与 package.json 的 "name" 一致，加载器据此解析模块。
+- insert:
+    - id: outer-brain
+      name: 'dsh-outer-brain'
+      config:
+        enabled: true        # 总开关：false ⇒ 不注册工具、不注入
+        guide: true          # 开工前是否注入「分发清单」
+        ledger: 'ledger'     # ledger（证据不灭 + 读时折价）/ legacy
+        decay: 0.35          # 时效折价率
+        cap: 3               # 每轮最多处置几件
+        autoEnforce: true    # 开工前自动跑一轮 enforce
+        leanSelect: true     # 只撤「选题类」干预，判据类一概不动
+        lean: false          # true ⇒ 撤掉全部干预（A/B 实验对照用）
+        hardGate: true       # 必做清单追加进本步必读消息
+        stallLimit: 5        # 连续多少轮零响应后措辞升级（只加压，永不封锁）
+        liftTtl: 3           # 升维回执宽限轮数
+        # 状态文件落点。不填时落在 DSH 的启动目录（process.cwd()）；
+        # 建议显式指定一个固定目录，否则从不同目录启动会各自生成一份状态。
+        # workDir: '/path/to/outer-brain-state'
+        jury:
+          enabled: true
+          maxTokens: 16384   # 判决 JSON + 长理由需留足余量；过小会被截断，表现为判决 unclear

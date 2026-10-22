@@ -1,0 +1,51 @@
+{
+  "name": "dsh-outer-brain",
+  "version": "0.1.0",
+  "description": "外置大脑 / Outer Brain — 把划界、矛盾显化、实践检验外化成 12 个 brain_* 工具，防治 agent 假完成、空转与自欺。Externalizes boundary-drawing, contradiction-surfacing and evidence-based verification into 12 brain_* tools against fake completion, spinning in place and self-deception.",
+  "type": "module",
+  "main": "./dsh/index.js",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "plugin",
+    "bundle",
+    "cordis",
+    "outer-brain",
+    "agent",
+    "reasoning",
+    "verification"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "files": [
+    "dsh",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./dsh/index.js",
+    "./dsh": "./dsh/index.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
+}
