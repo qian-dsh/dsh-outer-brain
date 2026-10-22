@@ -17,6 +17,11 @@
     "verification"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qian-dsh/dsh-outer-brain.git"
+  },
+  "homepage": "https://github.com/qian-dsh/dsh-outer-brain#readme",
   "engines": {
     "node": ">=22.19"
   },
