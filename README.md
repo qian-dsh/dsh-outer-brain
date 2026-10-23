@@ -2,19 +2,21 @@
 
 English | [中文](README.zh.md)
 
-**Externalizes boundary-drawing, contradiction-surfacing, and evidence-based verification into a set of tools plus a workflow — built to counter three failure modes that agents are bad at catching in themselves: fake completion, spinning in place, and self-deception.**
+**A philosopher's way of thinking, made executable — dialectics and practice-testing instead of prompt-level discipline. Built to govern two things that get worse the longer an agent runs: hallucination and long-session drift.**
 
-It does not make the model smarter. It gives it a **ledger, executable criteria, and outside review**.
+Most tools try to make the model *smarter*. This one doesn't. It gives the agent:
 
-## The problem it solves
+- **a way to think** — find the principal contradiction, refuse false dichotomies, let practice rather than rehearsal settle a claim;
+- **a way to check itself** — a ledger, executable criteria, and outside review, so "done" is a fact rather than an assertion.
 
-An agent is bad at catching itself doing these three things:
+## Two failure modes, and why length makes them worse
 
-| Failure | Symptom | How this plugin counters it |
+An agent is bad at catching itself doing either of these:
+
+| What goes wrong | How it shows up | What governs it |
 |---|---|---|
-| **Fake completion** | The ledger turns green and the summary reads well, but the deliverable does not exist | Criteria must **actually run a command and read the exit code**; after the machine gate passes, a **jury of three non-communicating reviewers** rules by majority |
-| **Spinning in place** | Constantly "making progress" — rewriting criteria, re-running the same command | `stalled` covers the semantic layer (the jury keeps asking for the same kind of thing); `spin` covers the mechanical layer (the same command over and over). The two are OR-ed together |
-| **Self-deception** | "Last time it was like this", "the conditions aren't right so I can't" | The evidence pool requires a **receipt** (verbatim command / path / URL); evidence without one carries zero weight. A judgment ledger records **claims that were overturned** |
+| **Hallucination** | The ledger turns green and the summary reads well, but the deliverable does not exist. "Last time it was like this." "The conditions aren't right so I can't." | Criteria must **actually run a command and read the exit code**; evidence without a **receipt** (verbatim command / path / URL) carries zero weight; after the machine gate passes, a **jury of three non-communicating reviewers** rules by majority |
+| **Long-session drift** | Twenty turns in, the agent is optimising something nobody asked for, or re-running the same command while calling it progress | The **contradiction tree** keeps the principal contradiction pinned so it cannot quietly migrate; `stalled` catches semantic circling while `spin` catches mechanical repetition (OR-ed together); overturned claims are **recorded** instead of silently forgotten |
 
 ## Install
 
