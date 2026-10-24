@@ -1648,6 +1648,16 @@ export function readPhilosophy(cfg) {
         if (defs) text = text.trimEnd() + '\n\n---\n\n' + defs + '\n'
       }
     }
+    {
+      // 原则层：从 PHILOSOPHY.full.md 只取「甲 · 原则层」一段。
+      // 只拼甲段而不是全文，是为了让注入体积可控（甲段约 4.7k 字符）。
+      const principlesFile = resolve(dirname(file), 'PHILOSOPHY.full.md')
+      if (existsSync(principlesFile)) {
+        const full = String(readFileSync(principlesFile, 'utf8'))
+        const m = full.match(/##\s*甲[\s\S]*?(?=\n##\s|$)/)
+        if (m && m[0].trim()) text = text.trimEnd() + '\n\n---\n\n' + m[0].trim() + '\n'
+      }
+    }
     const sha = createHash('sha256').update(text).digest('hex').slice(0, 16)
     return { ok: true, file, chars: text.length, text, sha, why: '' }
   } catch (e) {
