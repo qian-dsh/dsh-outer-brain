@@ -1,6 +1,6 @@
 {
   "name": "dsh-outer-brain",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "A philosopher's way of thinking made executable: dialectics and practice-testing to govern hallucination and long-session drift, so done is a verifiable fact rather than a claim.",
   "type": "module",
   "main": "./dsh/index.js",
@@ -32,7 +32,9 @@
     "README.zh.md",
     "LICENSE",
     "PHILOSOPHY.md",
-    "PHILOSOPHY.full.md"
+    "PHILOSOPHY.full.md",
+    "DESIGN-CORE.md",
+    "FORMAL-DEFS.md"
   ],
   "exports": {
     ".": "./dsh/index.js",
