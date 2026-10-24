@@ -98,7 +98,9 @@ export function looksOffTopic(text, lastUserText) {
   if (!uc) return { off: false, why: '' }
   if (uc.length <= 12) {
     if (tc.includes(uc)) return { off: false, why: '' }
-    return { off: true, why: `用户原话只有 ${uc.length} 字（「${u}」），但任务文本里找不到它 —— 这不是他说的那句话` }
+    return { off: true, why: `用户原话只有 ${uc.length} 字（「${u}」）—— 需求短是常态，不是错。`
+      + `写法：**原话留在 text 里**（如「${u}：把机制修到能真用」），`
+      + `**补全的部分写进 reading（你怎么理解）/ want（看到什么才算满足）** —— 那两格才是给 AI 补全用的。` }
   }
   const lc = longestCommon(t, u)
   if (lc >= 6) return { off: false, why: '' }

@@ -21,7 +21,7 @@ export function normDef(s) {
   return String(s || '').replace(/[\s，。；、：:,.!?！？"'“”‘’()（）【】\[\]—…\-~～/\\|]/g, '')
 }
 
-const NARROW_MARK = /不管|不是|不包括|不含|不涉及|不负责|不保证|不处理|不覆盖|不算|≠|只限|仅限/
+const NARROW_MARK = /不管|不是|不包括|不含|不涉及|不负责|不保证|不处理|不覆盖|不算|≠|只限|仅限|不验证/
 
 export function isParaphrase(text, cand) {
   const nt = normDef(text)
@@ -533,6 +533,15 @@ export function judgeDone(plan, id, result) {
         why = `${why}；🚧 陪审判证据到顶（连续 ${streak} 次）：${jury.why}`
           + `（缺的外部条件：${miss || '陪审未点名'}）——接不可达`
       }
+    } else if (jury.decision === 'overreached') {
+      pass = false
+      m.blocked_on = ''
+      why = `${why}；🚫 这一庭的缺项**过半是越界要求**（要换命令 / 非当事人取证 / 不依赖你的脚本）——`
+        + '**机制原理上满足不了**，既不算你没做到，也不能算通过。'
+        + '三条出口：① 那条读数若已由别的里程碑交付（同账本查，它可能已 done）⇒ 引用它；'
+        + '② 确实要那条读数 ⇒ 它该是**一条新里程碑**，不是把这条判成 pending；'
+        + '③ 把 claim 缩到这条命令能产出的范围。'
+        + `（陪审原话：${jury.why}）`
     } else {
       pass = false
       why = `${why}；但陪审未通过：${jury.why}`
@@ -1073,6 +1082,7 @@ export function failStreak(m) {
   const ev = (m?.evidence || []).filter(Boolean)
   let n = 0
   for (let i = ev.length - 1; i >= 0; i--) {
+    if (ev[i].jury && ev[i].jury.decision === 'overreached') continue
     if (ev[i].pass === false) n++
     else break
   }

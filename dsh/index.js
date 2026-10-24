@@ -1358,18 +1358,14 @@ export function settleLifts(st, cfg, { turn = null } = {}) {
 export async function probeJevHealth(st, cfg = {}) {
   const now = Date.now()
   if (st._jevHealth && now - (st._jevHealth.at || 0) < 30000) return st._jevHealth.v
-  if (!cfg?.jevEndpoint) {
-    st._jevHealth = { at: now, v: { status: 'not-configured' } }
-    return st._jevHealth.v
-  }
-  const endpoint = String(cfg.jevEndpoint)
+  const endpoint = String(cfg?.jevEndpoint || 'http://127.0.0.1:8000/v1/systemone')
   let v
   try {
     const r = await fetch(endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        model: cfg?.jevModel || 'default',
+        model: cfg?.jevModel || 'laya-multilingual',
         state: 'health probe',
         questions: { ok: { type: 'noul', instructions: 'Is this reachable?' } },
       }),
@@ -1381,12 +1377,14 @@ export async function probeJevHealth(st, cfg = {}) {
   }
   if (v.status !== 'up') {
     v.fix = {
-      what: '配置的外部决策层服务不可达 ⇒ brain_task 里的 jev_ask 不会出现',
-      cmd: cfg?.jevStartCmd || null,
-      then: '服务恢复后 brain_status.jev_health 会在 30 秒内变 up',
-      dont: '不要读成「机制不支持」——这是可选外部服务没起，不影响其它工具',
+      what: '决策层（laya-serve）没在跑 ⇒ `brain_task` 里的 `jev_ask` 会静默不出现（不是没功能，是服务没起）',
+      cmd: 'node E:\\dsh_new\\laya-local\\start-laya.mjs'
+        + '  # 用 detached spawn 起（真脱离）；别用 PowerShell 的 Start-Process —— 它会阻塞或被连带杀掉'
+        + '（三次事故记录见 start-laya.mjs 头注释）',
+      then: '起来后 `brain_status.jev_health` 会变 `up`（30 秒缓存，最多等 30 秒）；'
+        + '也可单跑 `node E:\\dsh_new\\laya-local\\start-laya.mjs --status` 看进程+端口+HTTP 三样',
+      dont: '别把 `down` 读成"机制不支持 Jev"——那是服务没起，不是功能没有',
     }
-    if (!v.fix.cmd) delete v.fix.cmd
   }
   st._jevHealth = { at: now, v }
   return v
@@ -1649,8 +1647,6 @@ export function readPhilosophy(cfg) {
       }
     }
     {
-      // 原则层：从 PHILOSOPHY.full.md 只取「甲 · 原则层」一段。
-      // 只拼甲段而不是全文，是为了让注入体积可控（甲段约 4.7k 字符）。
       const principlesFile = resolve(dirname(file), 'PHILOSOPHY.full.md')
       if (existsSync(principlesFile)) {
         const full = String(readFileSync(principlesFile, 'utf8'))
@@ -2965,7 +2961,7 @@ function applyInner(ctx, cfg, workDir, mark) {
       } catch (e) {
         diag({ ...cfg, workDir }, `jev task=${args.id} 降级 ${String(e.message || e).slice(0, 50)}`)
       }
-      return {
+      return stripUndefined({
         ok: r.ok, id: args.id, weight: r.weight,
         root: st.tree.root ?? null,
         root_budget: st.tree.budget ?? T.ROOT_BUDGET,
@@ -2992,7 +2988,7 @@ function applyInner(ctx, cfg, workDir, mark) {
               + '要自己找活就标 origin:"self"，并在回复里写明「这条是我自己找的」。')
           }
           const off = T.looksOffTopic(args.text, st.last_user_text)
-          if (off.off) notes.push(`⚠️ ${off.why} —— 账上那条不是他说的话。`)
+          if (off.off) notes.push(`⚠️ ${off.why}`)
           const gc = P.checkGoalIsomorphism(args.want, args.text)
           if (gc.mismatch) notes.push(`💡 ${gc.why}`)
           return notes.length ? { text_checked: true, text_suspect: tt.suspect ? tt.hits : null, notes } : { text_checked: Boolean(st.last_user_text) }
@@ -3003,7 +2999,7 @@ function applyInner(ctx, cfg, workDir, mark) {
             : '任务已记。权重=给定（你的话最高）。')
           : r.why,
         saved,
-      }
+      })
     },
     presentCall: () => ({ card: 'generic', title: '外置大脑·声明任务', kind: 'other', rawInput: {} }),
   })
@@ -4676,9 +4672,41 @@ function applyInner(ctx, cfg, workDir, mark) {
         steerCount++
         const rootP = T.pressure(st.tree, null)
         const overBudget = !!(rootP && rootP.left < 0)
+        const kindOf = (id) => {
+          const mm = st.plan?.milestones?.[id]
+          const evs = (mm?.evidence || []).filter(Boolean)
+          const lastJ = [...evs].reverse().find((e) => e && e.jury)?.jury
+          if (!lastJ) return null
+          const d = lastJ.decision
+          if (d === 'overreached') return 'overreached'
+          if (d === 'topped') return 'topped'
+          if (d === 'unclear') return 'unclear'
+          if (d === 'fail') return 'fail'
+          return null
+        }
+        const buckets = { overreached: [], topped: [], unclear: [], fail: [] }
+        for (const id of open) { const k = kindOf(id); if (k) buckets[k].push(id) }
+        const kindLine = (() => {
+          const parts = []
+          if (buckets.overreached.length) {
+            parts.push(`🚫 ${buckets.overreached.join('、')} —— 这一庭的缺项**过半是越界要求**（换命令/非当事人取证），`
+              + '机制给不了。**别再补证据**：① 引用已 done 的里程碑读数 ② 新开一条里程碑 ③ 缩 claim 到命令能产出的范围。')
+          }
+          if (buckets.topped.length) {
+            parts.push(`⛔ ${buckets.topped.join('、')} —— 证据到顶（缺的只能外部给）。该催的是**具名承接者**，不是补证据。`)
+          }
+          if (buckets.unclear.length) {
+            parts.push(`❓ ${buckets.unclear.join('、')} —— 判据含糊。该改的是 done_when（写成一句能判真假的话），补证据没用。`)
+          }
+          if (buckets.fail.length) {
+            parts.push(`🔴 ${buckets.fail.join('、')} —— 证据不足。这些里面只有它该**补证据**。`)
+          }
+          return parts.length ? '\n' + parts.join('\n') : ''
+        })()
         const base =
           '【外置大脑 · 对账闸】交付账还欠着：' + open.join('、')
-          + '（pending）。「达成」与「还欠着」不能同时成立 —— 出口三选一（机制不替你选）：'
+          + '（pending）。' + kindLine
+          + '\n「达成」与「还欠着」不能同时成立 —— 出口三选一（机制不替你选）：'
           + '① 继续做完；'
           + '② 收束：brain_plan 处置（dropped/failed + why）把没做完的降级成显式账、先把能交的落成 —— 逼近极限（预算/上下文/轮次）时这是正道，不是偷懒；'
           + '③ 改声明「不可达」并指名缺哪个外部条件（说不出来就是没做完）。'

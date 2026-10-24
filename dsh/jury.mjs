@@ -13,6 +13,7 @@ export const DECISION = {
   topped: 'topped',
   hung: 'hung',
   unclear: 'unclear',
+  overreached: 'overreached',
   unavailable: 'unavailable',
 }
 
@@ -206,7 +207,7 @@ export function tally(votes) {
   const need = NEED(n)
   const external = vs.filter((v) => v.verdict === VERDICT.insufficient && v.boundary === BOUNDARY.external).length
   const missing = [...new Set(vs.map((v) => String(v.missing || '').trim()).filter(Boolean))]
-  const OVERREACH = /(单跑|换跑|另跑|补跑|再跑.{0,6}一次|换一条命令|另一个参数|--only=|--verbose|单独执行)/
+  const OVERREACH = /(单跑|换跑|另跑|补跑|再跑.{0,6}一次|换一条命令|另一个参数|--only=|--verbose|单独执行|非当事人|绕过当事人|绕过你的脚本|不依赖|独立取证|第三方复抓|由机制自己)/
   const missing_kind = missing.map((m) => (OVERREACH.test(m) ? 'overreach' : 'fillable'))
   const overreach_n = missing_kind.filter((k) => k === 'overreach').length
   const overreached = missing.length > 0 && overreach_n * 2 >= missing.length
@@ -219,6 +220,7 @@ export function tally(votes) {
   if (n === 0) decision = DECISION.unavailable
   else if (support >= need) decision = DECISION.pass
   else if (insufficient >= need && external >= need) decision = DECISION.topped
+  else if (overreached && insufficient >= need) decision = DECISION.overreached
   else if (insufficient >= need) decision = DECISION.fail
   else if (undecidable >= need) decision = DECISION.unclear
   else if (broken > 0) decision = DECISION.unavailable
@@ -259,6 +261,8 @@ export function juryRecord(t, extra = {}) {
     unanimous: !!t.unanimous,
     missing: t.missing || [],
     gaps: t.gaps || [],
+    missing_kind: t.missing_kind || [],
+    overreached: !!t.overreached,
     dissent: t.dissent || [],
     votes: t.votes || [],
     ...extra,

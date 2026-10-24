@@ -1,6 +1,6 @@
 
-export const ENDPOINT = process.env.JEV_ENDPOINT || 'http://127.0.0.1:8000/v1/systemone'
-export const MODEL = process.env.JEV_MODEL || 'default'
+export const ENDPOINT = process.env.LAYA_ENDPOINT || 'http://127.0.0.1:8000/v1/systemone'
+export const MODEL = process.env.LAYA_MODEL || 'laya-multilingual'
 export const CTX_LIMIT = 1024
 
 export const ROUTE = Object.freeze({ ACT: 0.85, LLM: 0.60 })
