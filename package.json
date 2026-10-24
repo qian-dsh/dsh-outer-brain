@@ -1,6 +1,6 @@
 {
   "name": "dsh-outer-brain",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A philosopher's way of thinking made executable: dialectics and practice-testing to govern hallucination and long-session drift, so done is a verifiable fact rather than a claim.",
   "type": "module",
   "main": "./dsh/index.js",
@@ -30,7 +30,8 @@
     "cordis.patch.yml",
     "README.md",
     "README.zh.md",
-    "LICENSE"
+    "LICENSE",
+    "PHILOSOPHY.md"
   ],
   "exports": {
     ".": "./dsh/index.js",
