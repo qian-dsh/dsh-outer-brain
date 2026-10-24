@@ -113,3 +113,8 @@ Three paths in this release do not work end to end. They are listed here rather 
 ## License
 
 MIT
+---
+
+## Changelog
+
+每一版「改了什么、为什么改、怎么自己验」都在 [CHANGELOG.md](CHANGELOG.md)。

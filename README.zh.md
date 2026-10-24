@@ -113,3 +113,8 @@ workDir: '/path/to/outer-brain-state'
 ## 许可
 
 MIT
+---
+
+## 版本变更
+
+每一版「改了什么、为什么改、怎么自己验」都在 [CHANGELOG.md](CHANGELOG.md)。
